@@ -13,7 +13,8 @@ struct JSONFileDatabase {
 
 impl Database for JSONFileDatabase {
     fn read_db(&self) -> Result<DBState> {
-        todo!() // read the content's of self.file_path and deserialize it using serde
+        // read the content's of self.file_path and deserialize it using serde
+        
     }
 
     fn write_db(&self, db_state: &DBState) -> Result<()> {
