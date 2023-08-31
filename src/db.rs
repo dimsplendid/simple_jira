@@ -20,7 +20,9 @@ impl Database for JSONFileDatabase {
     }
 
     fn write_db(&self, db_state: &DBState) -> Result<()> {
-        todo!() // serialize db_state to json and store it in self.file_path
+        // serialize db_state to json and store it in self.file_path]
+        let db = serde_json::to_string(db_state)?;
+        fs::write(&self.file_path, db).map_err(|e| e.into())
     }
 }
 
@@ -95,7 +97,6 @@ mod tests {
             let read_result = db.read_db().unwrap();
 
             assert_eq!(write_result.is_ok(), true);
-            // TODO: fix this error by deriving the appropriate traits for DBState
             assert_eq!(read_result, state);
         }
     }
