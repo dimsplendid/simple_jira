@@ -18,27 +18,71 @@ impl JiraDatabase {
     }
     
     pub fn create_epic(&self, epic: Epic) -> Result<u32> {
-        todo!()
+        let mut db = self.read_db()?;
+        let id = db.last_item_id + 1;
+        db.last_item_id = id;
+        db.epics.insert(id, epic);
+        self.database.write_db(&db)?;
+        Ok(id)
     }
     
     pub fn create_story(&self, story: Story, epic_id: u32) -> Result<u32> {
-        todo!()
+        let mut db = self.read_db()?;
+        let id = db.last_item_id + 1;
+        db.last_item_id = id;
+        db.stories.insert(id, story);
+        let epic = db.epics.get_mut(&epic_id).ok_or(
+            anyhow::anyhow!("Epic not found")
+        )?;
+        epic.stories.push(id);
+        self.database.write_db(&db)?;
+        Ok(id)
     }
     
     pub fn delete_epic(&self, epic_id: u32) -> Result<()> {
-        todo!()
+        let mut db = self.read_db()?;
+        let epic = db.epics.remove(&epic_id).ok_or(
+            anyhow::anyhow!("Epic not found")
+        )?;
+        for story_id in epic.stories {
+            db.stories.remove(&story_id);
+        }
+        self.database.write_db(&db)?;
+        Ok(())
     }
     
     pub fn delete_story(&self,epic_id: u32, story_id: u32) -> Result<()> {
-        todo!()
+        let mut db = self.read_db()?;
+        let epic = db.epics.get_mut(&epic_id).ok_or(
+            anyhow::anyhow!("Epic not found")
+        )?;
+        if !epic.stories.contains(&story_id) {
+            return Err(anyhow::anyhow!("Story not found in epic"));
+        }
+        epic.stories.retain(|&id| id != story_id);
+        db.stories.remove(&story_id);
+        self.database.write_db(&db)?;
+        Ok(())
     }
     
     pub fn update_epic_status(&self, epic_id: u32, status: Status) -> Result<()> {
-        todo!()
+        let mut db = self.read_db()?;
+        let epic = db.epics.get_mut(&epic_id).ok_or(
+            anyhow::anyhow!("Epic not found")
+        )?;
+        epic.status = status;
+        self.database.write_db(&db)?;
+        Ok(())
     }
     
     pub fn update_story_status(&self, story_id: u32, status: Status) -> Result<()> {
-        todo!()
+        let mut db = self.read_db()?;
+        let story = db.stories.get_mut(&story_id).ok_or(
+            anyhow::anyhow!("Story not found")
+        )?;
+        story.status = status;
+        self.database.write_db(&db)?;
+        Ok(())
     }
 }
 trait Database {
