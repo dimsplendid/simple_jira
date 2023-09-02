@@ -43,8 +43,8 @@ fn delete_epic_prompt() -> bool {
     println!(
         "Are you sure you want to delete this epic? All stories in this epic will also be deleted [Y/n]:"
     );
-    if let Some(input) = get_user_input().chars().next() {
-        input.to_ascii_lowercase() == 'y'
+    if let input = get_user_input().trim() {
+        input.to_ascii_lowercase() == "y"
     } else {
         false
     }
@@ -53,8 +53,8 @@ fn delete_epic_prompt() -> bool {
 fn delete_story_prompt() -> bool {
     println!("----------------------------");
     println!("Are you sure you want to delete this story? [Y/n]:");
-    if let Some(input) = get_user_input().chars().next() {
-        input.to_ascii_lowercase() == 'y'
+    if let input = get_user_input().trim() {
+        input.to_ascii_lowercase() == "y"
     } else {
         false
     }
@@ -63,12 +63,12 @@ fn delete_story_prompt() -> bool {
 fn update_status_prompt() -> Option<Status> {
     println!("----------------------------");
     println!("New Status: (1 - OPEN, 2 - IN-PROGRESS, 3 - RESOLVED, 4 - CLOSED):");
-    if let Some(input) = get_user_input().chars().next() {
+    if let Ok(input) = get_user_input().trim().parse::<u8>() {
         match input {
-            '1' => Some(Status::Open),
-            '2' => Some(Status::InProgress),
-            '3' => Some(Status::Resolved),
-            '4' => Some(Status::Closed),
+            1 => Some(Status::Open),
+            2 => Some(Status::InProgress),
+            3 => Some(Status::Resolved),
+            4 => Some(Status::Closed),
             _ => None
         }
     } else {
