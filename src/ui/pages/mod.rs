@@ -47,8 +47,7 @@ impl Page for HomePage {
             "q" => Ok(Some(Action::Exit)),
             "c" => Ok(Some(Action::CreateEpic)),
             _ => {
-                let epic_id = input.parse::<u32>().ok();
-                if let Some(epic_id) = epic_id {
+                if let Ok(epic_id) = input.parse::<u32>() {
                     if epics.contains_key(&epic_id) {
                         Ok(Some(Action::NavigateToEpicDetail { epic_id }))
                     } else {
