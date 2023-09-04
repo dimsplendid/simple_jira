@@ -1,7 +1,9 @@
-use anyhow::{anyhow, Result, Context, Ok};
+use anyhow::{anyhow, Result, Ok, Context};
 use std::rc::Rc;
 
-use crate::{ui::{Page, HomePage, EpicDetail, StoryDetail, Prompts}, db::JiraDatabase, models::{Action, Status}};
+use crate::ui::{Page, HomePage, EpicDetail, StoryDetail, Prompts};
+use crate::db::JiraDatabase;
+use crate::models::Action;
 
 pub struct Navigator {
     pages: Vec<Box<dyn Page>>,

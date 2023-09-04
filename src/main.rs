@@ -11,7 +11,6 @@ mod io_utils;
 use io_utils::*;
 
 mod navigator;
-use models::Action;
 use navigator::*;
 
 fn main() {
