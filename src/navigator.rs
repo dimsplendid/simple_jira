@@ -47,7 +47,9 @@ impl Navigator {
             }
             Action::NavigateToPreviousPage => {
                 // remove the last page from the pages vector
-                self.pages.pop();
+                if !self.pages.is_empty() {
+                    self.pages.pop();
+                }
             }
             Action::CreateEpic => {
                 // prompt the user to create a new epic 
@@ -78,9 +80,12 @@ impl Navigator {
                         .with_context(
                             || format!("Failed to delete epic with id {}", epic_id)
                         )?;
+                    if !self.pages.is_empty() {
+                        self.pages.pop();
+                    }
                 } else {
-                    return Err(anyhow!("Failed to delete epic"));
-                }
+                    return Err(anyhow!("Failed to delete epic"))
+                };
             }
             Action::CreateStory { epic_id } => {
                 // prompt the user to create a new story
@@ -111,6 +116,9 @@ impl Navigator {
                         .with_context(
                             || format!("Failed to delete story with id {}", story_id)
                         )?;
+                    if !self.pages.is_empty() {
+                        self.pages.pop();
+                    }
                 } else {
                     return Err(anyhow!("Failed to delete story"));
                 }
