@@ -1,3 +1,4 @@
+use std::any::Any;
 use std::rc::Rc;
 
 use itertools::Itertools;
@@ -13,6 +14,7 @@ use page_helpers::*;
 pub trait Page {
     fn draw_page(&self) -> Result<()>;
     fn handle_input(&self, input: &str) -> Result<Option<Action>>;
+    fn as_any(&self) -> &dyn Any;
 }
 
 pub struct HomePage {
@@ -42,12 +44,12 @@ impl Page for HomePage {
     fn handle_input(&self, input: &str) -> Result<Option<Action>> {
         // match against the user input and return the corresponding action. 
         // If the user input was invalid return None.
-        let epics = self.db.read_db()?.epics;
         match input {
             "q" => Ok(Some(Action::Exit)),
             "c" => Ok(Some(Action::CreateEpic)),
             _ => {
                 if let Ok(epic_id) = input.parse::<u32>() {
+                    let epics = self.db.read_db()?.epics;
                     if epics.contains_key(&epic_id) {
                         Ok(Some(Action::NavigateToEpicDetail { epic_id }))
                     } else {
@@ -58,6 +60,10 @@ impl Page for HomePage {
                 }
             }
         }
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 
@@ -126,6 +132,10 @@ impl Page for EpicDetail {
             }
         }
     }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
 }
 
 pub struct StoryDetail {
@@ -164,6 +174,10 @@ impl Page for StoryDetail {
             "d" => Ok(Some(Action::DeleteStory { epic_id: self.epic_id, story_id: self.story_id })),
             _ => Ok(None)
         }
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 

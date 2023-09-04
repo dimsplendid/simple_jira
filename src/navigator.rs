@@ -1,7 +1,7 @@
 use anyhow::{anyhow, Result, Context, Ok};
 use std::rc::Rc;
 
-use crate::{ui::{Page, HomePage, EpicDetail, StoryDetail, Prompts}, db::JiraDatabase, models::Action};
+use crate::{ui::{Page, HomePage, EpicDetail, StoryDetail, Prompts}, db::JiraDatabase, models::{Action, Status}};
 
 pub struct Navigator {
     pages: Vec<Box<dyn Page>>,
@@ -26,34 +26,98 @@ impl Navigator {
     pub fn handle_action(&mut self, action: Action) -> Result<()> {
         match action {
             Action::NavigateToEpicDetail { epic_id } => {
-                todo!() // create a new EpicDetail instance and add it to the pages vector
+                // create a new EpicDetail instance
+                // and add it to the pages vector
+                let epic_detail = EpicDetail {
+                    db: Rc::clone(&self.db),
+                    epic_id,
+                };
+                self.pages.push(Box::new(epic_detail));
+
             }
             Action::NavigateToStoryDetail { epic_id, story_id } => {
-                todo!() // create a new StoryDetail instance and add it to the pages vector
+                // create a new StoryDetail instance
+                // and add it to the pages vector
+                let story_detail = StoryDetail {
+                    db: Rc::clone(&self.db),
+                    epic_id,
+                    story_id,
+                };
+                self.pages.push(Box::new(story_detail));
             }
             Action::NavigateToPreviousPage => {
-                todo!() // remove the last page from the pages vector
+                // remove the last page from the pages vector
+                self.pages.pop();
             }
             Action::CreateEpic => {
-                todo!() // prompt the user to create a new epic and persist it in the database
+                // prompt the user to create a new epic 
+                // and persist it in the database
+                let epic = (self.prompts.create_epic)();
+                self.db.create_epic(epic)
+                    .with_context(|| "Failed to create epic")?;
+
             }
             Action::UpdateEpicStatus { epic_id } => {
-                todo!() // prompt the user to update status and persist it in the database
+                // prompt the user to update status
+                // and persist it in the database
+                if let Some(status) = (self.prompts.update_status)() {
+                    self.db.update_epic_status(epic_id, status)
+                        .with_context(
+                            || format!("Failed to update epic status for epic with id {}", epic_id)
+                        )?;
+                } else {
+                    return Err(anyhow!("Failed to update epic status"));
+                }
             }
             Action::DeleteEpic { epic_id } => {
-                todo!() // prompt the user to delete the epic and persist it in the database
+                // prompt the user to delete the epic
+                // and persist it in the database
+                let delete = (self.prompts.delete_epic)();
+                if delete {
+                    self.db.delete_epic(epic_id)
+                        .with_context(
+                            || format!("Failed to delete epic with id {}", epic_id)
+                        )?;
+                } else {
+                    return Err(anyhow!("Failed to delete epic"));
+                }
             }
             Action::CreateStory { epic_id } => {
-                todo!() // prompt the user to create a new story and persist it in the database
+                // prompt the user to create a new story
+                // and persist it in the database
+                let story = (self.prompts.create_story)();
+                self.db.create_story(story, epic_id)
+                    .with_context(
+                        || format!("Failed to create story for epic with id {}", epic_id)
+                    )?;
             }
             Action::UpdateStoryStatus { story_id } => {
-                todo!() // prompt the user to update status and persist it in the database
+                // prompt the user to update status
+                // and persist it in the database
+                if let Some(status) = (self.prompts.update_status)() {
+                    self.db.update_story_status(story_id, status)
+                        .with_context(
+                            || format!("Failed to update story status for story with id {}", story_id)
+                        )?;
+                } else {
+                    return Err(anyhow!("Failed to update story status"));
+                }
             }
             Action::DeleteStory { epic_id, story_id } => {
-                todo!() // prompt the user to delete the story and persist it in the database
+                // prompt the user to delete the story and persist it in the database
+                let delete = (self.prompts.delete_story)();
+                if delete {
+                    self.db.delete_story(epic_id, story_id)
+                        .with_context(
+                            || format!("Failed to delete story with id {}", story_id)
+                        )?;
+                } else {
+                    return Err(anyhow!("Failed to delete story"));
+                }
             }
             Action::Exit => {
-                todo!() // remove all pages from the pages vector
+                // remove all pages from the pages vector
+                self.pages.clear();
             },
         }
 
